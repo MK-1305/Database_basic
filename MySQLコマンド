@@ -1,0 +1,25 @@
+bashシェルでコンテナの中に入る
+docker exec -it コンテナ名 bash
+（-it:このオプションは実行を対話式にします（-i）と偽TTYを割り当てます（-t）、これはシェルセッションを実行するために必要です。）
+
+MySQLにログイン
+mysql -u root -p
+
+DBとユーザー
+CREATE,SHOW,DROP
+GRANT ALL PRIVILEGES ON *.* TO 'poppo'@'localhost';
+FLUSH PRIVILEGES,
+SELECT User, Host FROM mysql.user;
+
+テーブル
+CREATE TABLE QUEST (
+    -> id INT AUTO_INCREMENT PRIMARY KEY,
+    -> name VARCHAR(255) NOT NULL,
+    -> age INT NOT NULL);
+
+SHOW TABLES
+ALTER TABLE QUEST ADD COLUMN email VARCHAR(255);(カラムの追加)
+DESCRIBE QUEST;（テーブルの中身）
+
+
+
