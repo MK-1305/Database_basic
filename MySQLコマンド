@@ -9,7 +9,7 @@ DBとユーザー
 CREATE,SHOW,DROP
 GRANT ALL PRIVILEGES ON *.* TO 'poppo'@'localhost';
 FLUSH PRIVILEGES,
-SELECT User, Host FROM mysql.user;
+SELECT User, Host FROM mysql.user;(ユーザーの表示)
 
 テーブル
 CREATE TABLE QUEST (
@@ -19,7 +19,103 @@ CREATE TABLE QUEST (
 
 SHOW TABLES
 ALTER TABLE QUEST ADD COLUMN email VARCHAR(255);(カラムの追加)
-DESCRIBE QUEST;（テーブルの中身）
+DESCRIBE QUEST;（テーブルのカラム確認）
+DROP TABLE QUEST;(テーブルの削除)
+
+INSERT INTO 従業員 (id, name, position, salary)
+VALUES (1, '山田太郎', 'エンジニア', 300000);(データの追加)
+
+SELECT * FROM テーブル名;(テーブルのすべてのデータ出力)
+
+UPDATE テーブル名
+SET カラム名1 = '新しい値1', カラム名2 = '新しい値2'
+WHERE 条件;(id = 1など)
+
+
+DELETE FROM テーブル名;(データの削除、複数削除)
+TRUNCATE TABLE テーブル名;(全データ削除、オートインクリメントリセット)
+
+SELECT emp_no AS employee_no FROM dept_manager;(カラム名を変更して出力)
+SELECT DISTINCT dept_no FROM dept_manager;(重複行を削除して出力)
+SELECT * FROM employees LIMIT 10;(10行のみ出力)
+SELECT * FROM employees WHERE gender = 'F' LIMIT 10;(whereで絞り込み)
+SELECT * FROM employees WHERE gender != 'F' LIMIT 10;(whereで否定形の絞り込み)
+SELECT * FROM employees WHERE birth_date >= '1960-01-01' LIMIT 10;(定めた誕生日以降の人を出力)
+SELECT * FROM employees WHERE first_name LIKE '%vi%' LIMIT 10;(任意の文字列を含んだ人を出力)
+SELECT * FROM employees WHERE birth_date BETWEEN '1960-01-01' AND '1960-01-31' LIMIT 10;(範囲を指定して出力)
+SELECT * FROM employees WHERE first_name = 'Mary' AND gender = 'F';(複数条件で出力and)
+SELECT * FROM employees WHERE first_name = 'Mary' OR last_name = 'Peck' LIMIT 10;(複数条件で出力or)
+SELECT * FROM employees WHERE emp_no IN (10011, 10021, 10031);(文字列での検索も可能)
+SELECT first_name, last_name FROM employees WHERE emp_no = 20000;(対象のカラムだけを条件付きで出力)
+
+SELECT * FROM employees ORDER BY birth_date ASC LIMIT 10;(昇順に並べ替える)
+SELECT * FROM employees ORDER BY birth_date DESC LIMIT 10;(降順に並べ替える)
+SELECT * FROM employees ORDER BY birth_date ASC, hire_date DESC LIMIT 30;(昇順と降順)
+
+SELECT SUM(salary) AS total_salaries FROM salaries;(列の合計値)
+SELECT AVG(salary) AS average_salaries FROM salaries;(列の平均値)
+SELECT MAX(salary) AS max_salary FROM salaries;(列の最大値)
+SELECT MIN(salary) AS min_salary FROM salaries;(列の最小値)
+SELECT COUNT(*) AS total_rows FROM salaries;(行数)
+SELECT MAX(salary) AS max_salary FROM salaries WHERE from_date = '1986-06-26';(絞り込みとの組み合わせ)
+SELECT ROUND(AVG(salary), 1) AS average_salary FROM salaries WHERE to_date = '1991-06-26';(小数第一位)
+
+SELECT emp_no, COUNT(salary) AS salary_records FROM salaries GROUP BY emp_no LIMIT 10;(GROUP BY)
+SELECT emp_no, MIN(salary) AS min_salary, MAX(salary) AS max_salary FROM salaries WHERE emp_no BETWEEN 10001 AND 10010 GROUP BY emp_no;
+SELECT emp_no, MIN(from_date) AS start_date, MAX(to_date) AS end_date FROM salaries WHERE emp_no BETWEEN 10001 AND 10010 GROUP BY emp_no;
+SELECT emp_no, MAX(salary) AS max_salary FROM salaries GROUP BY emp_no HAVING MAX(salary) > 140000;(HAVINGはWHEREと違い集計結果に対してフィルタリングする)
+SELECT emp_no, MIN(salary) AS min_salary FROM salaries WHERE emp_no BETWEEN 10001 AND 10100 GROUP BY emp_no HAVING MIN(salary) < 40000;
+SELECT emp_no, MAX(to_date) AS last_work_day FROM salaries WHERE emp_no BETWEEN 10001 AND 10100 AND to_date <> '9999-01-01' GROUP BY emp_no;
+
+テーブル結合
+;内部結合
+SELECT * FROM dept_manager
+INNER JOIN employees ON dept_manager.emp_no = employees.emp_no;
+
+;列の選択
+SELECT dept_manager.dept_no, dept_manager.emp_no, employees.first_name, employees.last_name
+FROM dept_manager
+INNER JOIN employees ON dept_manager.emp_no = employees.emp_no;
+
+;複数の内部結合
+SELECT departments.dept_no, departments.dept_name, dept_manager.emp_no, employees.first_name, employees.last_name
+FROM dept_manager
+INNER JOIN employees ON dept_manager.emp_no = employees.emp_no
+INNER JOIN departments ON dept_manager.dept_no = departments.dept_no;
+
+;絞り込み
+SELECT departments.dept_no, departments.dept_name, dept_manager.emp_no, employees.first_name, employees.last_name
+FROM dept_manager
+INNER JOIN employees ON dept_manager.emp_no = employees.emp_no
+INNER JOIN departments ON dept_manager.dept_no = departments.dept_no
+WHERE dept_manager.to_date = '9999-01-01';(whereはinnner joinの後に書く)
+
+;給与
+SELECT employees.emp_no, employees.first_name, employees.last_name, salaries.salary, salaries.from_date, salaries.to_date
+FROM employees
+INNER JOIN salaries ON employees.emp_no = salaries.emp_no
+WHERE employees.emp_no BETWEEN 10001 AND 10010;
+
+;内部結合と外部結合の違い
+INNER JOIN（内部結合）: 両方のテーブルに存在するレコードのみを結果として返します。つまり、結合条件にマッチするレコードのみが結果に含まれます。
+
+OUTER JOIN（外部結合）: 片方のテーブルにしか存在しないレコードも結果に含めることができます。LEFT OUTER JOINは左側のテーブルの全レコードと、右側のテーブルとマッチするレコードを結果として返します。右側のテーブルにマッチしない場合は、右側のフィールドはNULLになります。RIGHT OUTER JOINとFULL OUTER JOINもあり、それぞれ逆、または両方のテーブルに対して同様の操作を行います。
+
+使い分け:
+
+マッチするレコードのみが必要な場合はINNER JOINを使用します。
+片方のテーブルの全レコードを含めたい場合や、マッチしないレコードにも興味がある場合はOUTER JOIN（LEFT、RIGHT、FULL）を使用します。
+
+
+
+
+
+
+
+
+
+
+
 
 
 
